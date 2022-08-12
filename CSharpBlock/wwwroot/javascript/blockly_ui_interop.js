@@ -24,3 +24,18 @@ export function send(payload, cb) {
         .then(cb)
         .catch(err => console.error(err))
 }
+
+export function setBlocks(value) {
+    var xmlDom = null;
+    try {
+        xmlDom = Blockly.Xml.textToDom(value);
+    } catch (e) {
+        console.log(e);
+    }
+    if (xmlDom) {
+        workspace.clear();
+        Blockly.Xml.domToWorkspace(xmlDom, workspace);
+    }
+
+    Blockly.Xml.textToDom(value);
+}

@@ -24,4 +24,8 @@
     <None Remove="Microsoft.CodeAnalysis.Workspaces.Common" />
     <None Remove="Microsoft.CodeAnalysis.CSharp.Workspaces" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CSharpToBlockly\CSharpToBlockly.csproj" />
+  </ItemGroup>
 </Project>
