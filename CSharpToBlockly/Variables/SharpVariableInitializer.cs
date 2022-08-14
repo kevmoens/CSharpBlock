@@ -28,7 +28,7 @@ namespace CSharpToBlockly.Variables
 
             var valueNode = expressionNode.Value;
 
-            SharpExpressionSyntax.ParseNode(ref doc, ref LastNode, valueNode);
+            SharpExpressionSyntax.ParseNode(ref doc, ref LastNode, valueNode, true);
             
         }
     }

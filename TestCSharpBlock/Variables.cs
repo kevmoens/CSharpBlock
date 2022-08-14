@@ -1,6 +1,6 @@
 namespace TestCSharpBlock
 {
-    public class Tests
+    public class Variables
     {
         [SetUp]
         public void Setup()
@@ -62,10 +62,11 @@ namespace TestCSharpBlock
         }
 
 
+
         [Test]
-        public void VariableDeclareInitializerIncrementNumber()
+        public void VariableDeclareInitializerSetVariableNumeric()
         {
-            var code = @"dynamic n = 1; n = n + 1;";
+            var code = @"dynamic n = 1; n = 2;";
             var expected = @"<xml>
   <variables>
     <variable>n</variable>
@@ -73,28 +74,26 @@ namespace TestCSharpBlock
   <block type=""variables_set"">
     <field name=""VAR"">n</field>
     <value name=""VALUE"">
-      <block type=""math_arithmetic"">
-        <field name=""OP"">ADD</field>
-        <value name=""A"">
-          <shadow type=""math_number"">
-            <field name=""NUM"">1</field>
-          </shadow>
-          <block type=""variables_get"">
-            <field name=""VAR"">n</field>
-          </block>
-        </value>
-        <value name=""B"">
-          <shadow type=""math_number"">
-            <field name=""NUM"">1</field>
-          </shadow>
-        </value>
+      <block type=""math_number"">
+        <field name=""NUM"">1</field>
       </block>
     </value>
+    <next>
+      <block type=""variables_set"">
+        <field name=""VAR"">n</field>
+        <value name=""VALUE"">
+          <block type=""math_number"">
+            <field name=""NUM"">2</field>
+          </block>
+        </value>
+      </block>
+    </next>
   </block>
 </xml>";
             var actual = SharpParse.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
+
 
     }
 }

@@ -55,8 +55,8 @@ namespace CSharpToBlockly.Variables
                     var fieldXml = new XElement("field", new XAttribute("name", "VAR"), variable.Identifier.ValueText);
                     blockXml.Add(fieldXml);
                     var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
-                    SharpVariableInitializer.ParseNode(ref valueXml, ref LastNode, initializer);
                     blockXml.Add(valueXml);
+                    SharpVariableInitializer.ParseNode(ref valueXml, ref LastNode, initializer);
                 }
             }
             doc.Add(variablesXml);

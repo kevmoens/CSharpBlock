@@ -54,7 +54,7 @@ namespace CSharpToBlockly
                     break;
                 case "GlobalStatement":
                 default:
-                    //doc.Add(new XElement("MissingNode", node.GetType().Name));
+                    doc.Add(new XElement("MissingNode", node.GetType().Name));
                     var lastNode = new XElement("Empty", "");
                     foreach (var child in node.ChildNodes())
 	                {

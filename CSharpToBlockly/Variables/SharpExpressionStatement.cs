@@ -28,9 +28,9 @@ namespace CSharpToBlockly.Variables
                             blockXml.Add(new XElement("field", new XAttribute("name", "VAR"), left.Identifier.Value));
                             var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
                             var right = assign.Right as ExpressionSyntax;
-                            SharpExpressionSyntax.ParseNode(ref valueXml, ref LastNode, right);
-
                             blockXml.Add(valueXml);
+                            SharpExpressionSyntax.ParseNode(ref valueXml, ref LastNode, right, true);
+
                             doc.Add(blockXml);                            
                             LastNode = valueXml;
                             break;
