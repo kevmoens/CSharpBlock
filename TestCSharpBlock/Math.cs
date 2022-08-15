@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TestCSharpBlock.Configuration;
 
 namespace TestCSharpBlock
 {
@@ -39,7 +41,8 @@ namespace TestCSharpBlock
     </value>
   </block>
 </xml>";
-            var actual = SharpParse.Parse(code).ToString();
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
 
@@ -47,7 +50,7 @@ namespace TestCSharpBlock
         [Test]
         public void DeclareInitializerRemainder()
         {
-            var code = @"int n = 4; n = n % 3;";
+            var code = @"int n = 3; n = 4 % n;";
             var expected = @"<xml>
   <variables>
     <variable>n</variable>
@@ -56,7 +59,7 @@ namespace TestCSharpBlock
     <field name=""VAR"">n</field>
     <value name=""VALUE"">
       <block type=""math_number"">
-        <field name=""NUM"">4</field>
+        <field name=""NUM"">3</field>
       </block>
     </value>
     <next>
@@ -66,16 +69,16 @@ namespace TestCSharpBlock
           <block type=""math_modulo"">
             <value name=""DIVIDEND"">
               <shadow type=""math_number"">
+                <field name=""NUM"">4</field>
+              </shadow>
+            </value>
+            <value name=""DIVISOR"">
+              <shadow type=""math_number"">
                 <field name=""NUM"">64</field>
               </shadow>
               <block type=""variables_get"">
                 <field name=""VAR"">n</field>
               </block>
-            </value>
-            <value name=""DIVISOR"">
-              <shadow type=""math_number"">
-                <field name=""NUM"">3</field>
-              </shadow>
             </value>
           </block>
         </value>
@@ -83,7 +86,8 @@ namespace TestCSharpBlock
     </next>
   </block>
 </xml>";
-            var actual = SharpParse.Parse(code).ToString();
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
     }

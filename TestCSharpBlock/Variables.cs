@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using TestCSharpBlock.Configuration;
+
 namespace TestCSharpBlock
 {
     public class Variables
@@ -24,7 +27,8 @@ namespace TestCSharpBlock
     </value>
   </block>
 </xml>";
-            var actual = SharpParse.Parse(code).ToString();
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
 
@@ -57,7 +61,8 @@ namespace TestCSharpBlock
     </next>
   </block>
 </xml>";
-            var actual = SharpParse.Parse(code).ToString();
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
 
@@ -90,7 +95,8 @@ namespace TestCSharpBlock
     </next>
   </block>
 </xml>";
-            var actual = SharpParse.Parse(code).ToString();
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
             Assert.AreEqual(expected, actual);
         }
 

@@ -1,14 +1,23 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Xml.Linq;
 
 namespace CSharpToBlockly.Functions
 {
-    internal class SharpMethodDeclaration
+    internal class SharpMethodDeclaration : ISharpMethodDeclaration
     {
-        internal static void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        ILogger<SharpMethodDeclaration> _logger;
+        IServiceProvider _serviceProvider;
+        public SharpMethodDeclaration(ILogger<SharpMethodDeclaration> logger, IServiceProvider serviceProvider)
         {
-            
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
+        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        {
+
             if (!(node is MethodDeclarationSyntax))
             {
                 return;
@@ -27,7 +36,7 @@ namespace CSharpToBlockly.Functions
                 returnTypeVoid = "no";
 
             }
-            
+
             var methodXml = new XElement("block",
                             new XAttribute("type", $"procedures_def{returnTypeVoid}return")
                             , "");
@@ -48,13 +57,14 @@ namespace CSharpToBlockly.Functions
 
             foreach (var child in node.ChildNodes())
             {
-                SharpParse.ParseNode(ref methodBlockXml, ref LastNode, child);
+                var sharpParse = _serviceProvider.GetRequiredService<SharpParse>();
+                sharpParse.ParseNode(ref methodBlockXml, ref LastNode, child);
             }
 
             doc.Add(methodXml);
 
             LastNode = methodXml;
-        
+
         }
     }
 }
