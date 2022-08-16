@@ -6,20 +6,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpToBlockly.Variables
 {
-    public class SharpExpressionStatement
+    public class SharpExpressionStatement : ISharpExpressionStatement
     {
 
-        internal static void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        ILogger<SharpExpressionStatement> _logger;
+        IServiceProvider _serviceProvider;
+        public SharpExpressionStatement(ILogger<SharpExpressionStatement> logger, IServiceProvider serviceProvider)
+        {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
+        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
         {
             if (node is ExpressionStatementSyntax)
             {
                 var literalNode = node as ExpressionStatementSyntax;
                 foreach (var child in literalNode.ChildNodes())
                 {
-                    switch (child.GetType().Name )
+                    switch (child.GetType().Name)
                     {
                         case "AssignmentExpressionSyntax":
                             var assign = child as AssignmentExpressionSyntax;
@@ -29,9 +38,10 @@ namespace CSharpToBlockly.Variables
                             var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
                             var right = assign.Right as ExpressionSyntax;
                             blockXml.Add(valueXml);
-                            SharpExpressionSyntax.ParseNode(ref valueXml, ref LastNode, right, true);
+                            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+                            sharpExpressionSyntax.ParseNode(ref valueXml, ref LastNode, right, true);
 
-                            doc.Add(blockXml);                            
+                            doc.Add(blockXml);
                             LastNode = valueXml;
                             break;
                     }

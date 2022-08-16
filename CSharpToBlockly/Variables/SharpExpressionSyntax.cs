@@ -7,13 +7,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpExpressionSyntax
+    internal class SharpExpressionSyntax : ISharpExpressionSyntax
     {
 
-        internal static void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node, bool createBlock)
+        ILogger<SharpExpressionSyntax> _logger;
+        IServiceProvider _serviceProvider;
+        public SharpExpressionSyntax(ILogger<SharpExpressionSyntax> logger, IServiceProvider serviceProvider)
+        {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
+
+        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node, bool createBlock)
         {
             var blockXml = doc.Parent;
 
@@ -44,16 +54,19 @@ namespace CSharpToBlockly.Variables
                 {
                     doc.Add(literalXml);
                 }
-            } else if (node is IdentifierNameSyntax)
+            }
+            else if (node is IdentifierNameSyntax)
             {
                 var identifierNode = node as IdentifierNameSyntax;
                 doc.Add(new XElement("block", new XAttribute("type", "variables_get"), new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ToFullString())));
-            } else if (node is ParenthesizedExpressionSyntax)
+            }
+            else if (node is ParenthesizedExpressionSyntax)
             {
                 var parenNode = node as ParenthesizedExpressionSyntax;
                 //parenNode.Expression //Inner Expression
 
-            } else if (node is BinaryExpressionSyntax)
+            }
+            else if (node is BinaryExpressionSyntax)
             {
                 var binaryNode = node as BinaryExpressionSyntax;
                 var left = binaryNode.Left as ExpressionSyntax;
@@ -63,14 +76,14 @@ namespace CSharpToBlockly.Variables
                     case "+":
                         LastNode = ParseNodeAdd(LastNode, blockXml, left, right);
                         break;
-                }                
+                }
 
             }
 
 
         }
 
-        private static XElement ParseNodeAdd(XElement LastNode, XElement? blockXml, ExpressionSyntax left, ExpressionSyntax right)
+        private XElement ParseNodeAdd(XElement LastNode, XElement? blockXml, ExpressionSyntax left, ExpressionSyntax right)
         {
             blockXml.Attribute("type").Value = "math_arithmetic";
             var fieldXml = new XElement("field",
@@ -89,7 +102,8 @@ namespace CSharpToBlockly.Variables
                                         )
                                     )
                                );
-            SharpExpressionSyntax.ParseNode(ref addValueAXml, ref LastNode, left, false);
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            sharpExpressionSyntax.ParseNode(ref addValueAXml, ref LastNode, left, false);
             blockXml.Add(addValueAXml);
             var addValueBXml = new XElement("value",
                                     new XAttribute("name", "B")
@@ -101,7 +115,7 @@ namespace CSharpToBlockly.Variables
                                         )
                                     )
                                );
-            SharpExpressionSyntax.ParseNode(ref addValueBXml, ref LastNode, right, false);
+            sharpExpressionSyntax.ParseNode(ref addValueBXml, ref LastNode, right, false);
             blockXml.Add(addValueBXml);
             return LastNode;
         }

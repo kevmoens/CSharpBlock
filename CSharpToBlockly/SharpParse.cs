@@ -34,6 +34,7 @@ namespace CSharpToBlockly
         }
         internal void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
         {
+            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
             switch (node.Kind().ToString())
             {
                 case "CompilationUnit":
@@ -58,15 +59,16 @@ namespace CSharpToBlockly
                         }
                     }
                     break;
-                case "LocalDeclarationStatement":                    
-                    SharpLocalDeclarationStatement.ParseNode(ref doc, ref LastNode, node);
+                case "LocalDeclarationStatement":
+                    var sharpDeclare = _serviceProvider.GetRequiredService<ISharpLocalDeclarationStatement>();
+                    sharpDeclare.ParseNode(ref doc, ref LastNode, node);
                     break;
                 case "ExpressionStatement":
-                    SharpExpressionStatement.ParseNode(ref doc, ref LastNode, node);
+                    var sharpExpressionStatement = _serviceProvider.GetRequiredService<ISharpExpressionStatement>();
+                    sharpExpressionStatement.ParseNode(ref doc, ref LastNode, node);
                     break;
                 case "GlobalStatement":
                 default:
-                    //doc.Add(new XElement("MissingNode", node.GetType().Name));
                     var lastNode = new XElement("Empty", "");
                     foreach (var child in node.ChildNodes())
 	                {

@@ -6,13 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using CSharpToBlockly.Functions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpVariableInitializer
+    internal class SharpVariableInitializer : ISharpVariableInitializer
     {
+        ILogger<SharpVariableInitializer> _logger;
+        IServiceProvider _serviceProvider;
+        public SharpVariableInitializer(ILogger<SharpVariableInitializer> logger, IServiceProvider serviceProvider)
+        {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
 
-        internal static void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
         {
 
             if (!(node is EqualsValueClauseSyntax))
@@ -28,8 +38,9 @@ namespace CSharpToBlockly.Variables
 
             var valueNode = expressionNode.Value;
 
-            SharpExpressionSyntax.ParseNode(ref doc, ref LastNode, valueNode, true);
-            
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            sharpExpressionSyntax.ParseNode(ref doc, ref LastNode, valueNode, true);
+
         }
     }
 }

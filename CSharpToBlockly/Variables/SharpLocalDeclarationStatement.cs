@@ -1,12 +1,22 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Xml.Linq;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpLocalDeclarationStatement
+    internal class SharpLocalDeclarationStatement : ISharpLocalDeclarationStatement
     {
-        internal static void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        ILogger<SharpLocalDeclarationStatement> _logger;
+        IServiceProvider _serviceProvider;
+        public SharpLocalDeclarationStatement(ILogger<SharpLocalDeclarationStatement> logger, IServiceProvider serviceProvider)
+        {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+        }
+
+        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
         {
 
             if (!(node is LocalDeclarationStatementSyntax))
@@ -33,7 +43,7 @@ namespace CSharpToBlockly.Variables
 
             }
             else
-            {                
+            {
                 switch (declareNode.Declaration.Type.ToString())
                 {
                     case "int":
@@ -56,7 +66,9 @@ namespace CSharpToBlockly.Variables
                     blockXml.Add(fieldXml);
                     var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
                     blockXml.Add(valueXml);
-                    SharpVariableInitializer.ParseNode(ref valueXml, ref LastNode, initializer);
+
+                    var sharpVariableInitializer = _serviceProvider.GetRequiredService<ISharpVariableInitializer>();
+                    sharpVariableInitializer.ParseNode(ref valueXml, ref LastNode, initializer);
                 }
             }
             doc.Add(variablesXml);
