@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace CSharpToBlockly.Functions
         public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
         {
 
+            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
             if (!(node is MethodDeclarationSyntax))
             {
                 return;
