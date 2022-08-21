@@ -11,10 +11,61 @@ namespace TestCSharpBlock
     internal class Math
     {
 
+
+        [Test]
+        public void SetNumber()
+        {
+            var code = @"n = 1;";
+            var expected = @"<xml>
+  <block type=""variables_set"">
+    <field name=""VAR"">n </field>
+    <value name=""VALUE"">
+      <block type=""math_number"">
+        <field name=""NUM"">1</field>
+      </block>
+    </value>
+  </block>
+</xml>";
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        [Test]
+        public void DeclareIncrementNumber()
+        {
+            var code = @"n = n + 1;";
+            var expected = @"<xml>
+  <block type=""variables_set"">
+    <field name=""VAR"">n</field>
+    <value name=""VALUE"">
+      <block type=""math_arithmetic"">
+        <field name=""OP"">ADD</field>
+        <value name=""A"">
+          <block type=""variables_get"">
+            <field name=""VAR"">n</field>
+          </block>
+        </value>
+        <value name=""B"">
+          <block type=""math_number"">
+            <field name=""NUM"">1</field>
+          </block>
+        </value>
+      </block>
+    </value>
+  </block>
+</xml>";
+            var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
+            var actual = parser.Parse(code).ToString();
+            Assert.AreEqual(expected, actual);
+        }
+
+
         [Test]
         public void DeclareInitializerIncrementNumber()
         {
-            var code = @"dynamic n; n = n + 1;";
+            var code = @"dynamic n = 1; n = n + 1;";
             var expected = @"<xml>
   <variables>
     <variable>n</variable>
@@ -22,23 +73,30 @@ namespace TestCSharpBlock
   <block type=""variables_set"">
     <field name=""VAR"">n</field>
     <value name=""VALUE"">
-      <block type=""math_arithmetic"">
-        <field name=""OP"">ADD</field>
-        <value name=""A"">
-          <shadow type=""math_number"">
-            <field name=""NUM"">1</field>
-          </shadow>
-          <block type=""variables_get"">
-            <field name=""VAR"">n</field>
-          </block>
-        </value>
-        <value name=""B"">
-          <shadow type=""math_number"">
-            <field name=""NUM"">1</field>
-          </shadow>
-        </value>
+      <block type=""math_number"">
+        <field name=""NUM"">1</field>
       </block>
     </value>
+    <next>
+      <block type=""variables_set"">
+        <field name=""VAR"">n</field>
+        <value name=""VALUE"">
+          <block type=""math_arithmetic"">
+            <field name=""OP"">ADD</field>
+            <value name=""A"">
+              <block type=""variables_get"">
+                <field name=""VAR"">n</field>
+              </block>
+            </value>
+            <value name=""B"">
+              <block type=""math_number"">
+                <field name=""NUM"">1</field>
+              </block>
+            </value>
+          </block>
+        </value>
+      </block>
+    </next>
   </block>
 </xml>";
             var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
