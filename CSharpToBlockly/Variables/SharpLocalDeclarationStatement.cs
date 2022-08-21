@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,7 @@ namespace CSharpToBlockly.Variables
                 return;
             }
 
+            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
             //TODO Handle Usings
             //declareNode.UsingKeyword
 

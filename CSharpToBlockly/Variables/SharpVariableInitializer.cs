@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using CSharpToBlockly.Functions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace CSharpToBlockly.Variables
 {
@@ -35,6 +36,7 @@ namespace CSharpToBlockly.Variables
             {
                 return;
             }
+            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
 
             var valueNode = expressionNode.Value;
 
