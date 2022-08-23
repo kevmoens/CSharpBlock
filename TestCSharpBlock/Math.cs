@@ -18,7 +18,7 @@ namespace TestCSharpBlock
             var code = @"n = 1;";
             var expected = @"<xml>
   <block type=""variables_set"">
-    <field name=""VAR"">n </field>
+    <field name=""VAR"">n</field>
     <value name=""VALUE"">
       <block type=""math_number"">
         <field name=""NUM"">1</field>
@@ -37,6 +37,9 @@ namespace TestCSharpBlock
         {
             var code = @"n = n + 1;";
             var expected = @"<xml>
+  <variables>
+    <variable>n</variable>
+  </variables>
   <block type=""variables_set"">
     <field name=""VAR"">n</field>
     <value name=""VALUE"">
