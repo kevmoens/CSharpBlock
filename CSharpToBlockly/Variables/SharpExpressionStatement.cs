@@ -17,17 +17,20 @@ namespace CSharpToBlockly.Variables
 
         ILogger<SharpExpressionStatement> _logger;
         IServiceProvider _serviceProvider;
-        public SharpExpressionStatement(ILogger<SharpExpressionStatement> logger, IServiceProvider serviceProvider)
+        ParsePersistence _parsePersistence;
+        public SharpExpressionStatement(ILogger<SharpExpressionStatement> logger, IServiceProvider serviceProvider, ParsePersistence parsePersistence)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        public void ParseNode(ParsePersistenceLocation location)
         {
-            if (node is ExpressionStatementSyntax)
+            var detail = _parsePersistence.Nodes[location];
+            if (detail.Node is ExpressionStatementSyntax)
             {
-                _logger.LogTrace("Parse {Node.Kind}", node.Kind());
-                var literalNode = node as ExpressionStatementSyntax;
+                _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
+                var literalNode = detail.Node as ExpressionStatementSyntax;
                 switch (literalNode.Expression.Kind().ToString())
                 {
                     case "SimpleAssignmentExpression":
@@ -45,16 +48,20 @@ namespace CSharpToBlockly.Variables
                             var blockXml = new XElement("block", new XAttribute("type", "variables_set"));
 
                             var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
-                            sharpExpressionSyntax.ParseNode(ref blockXml, ref LastNode, left, false);
+                            var leftLocation = location.CreateChildNode("0");
+                            _parsePersistence.Nodes.TryAdd(leftLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = left });
+                            sharpExpressionSyntax.ParseNode(leftLocation, false);
                             
                             var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
                             var right = assign.Right as ExpressionSyntax;
                             blockXml.Add(valueXml);
                             
-                            sharpExpressionSyntax.ParseNode(ref valueXml, ref LastNode, right, true);
+                            var rightLocation = location.CreateChildNode("1");
+                            _parsePersistence.Nodes.TryAdd(rightLocation, new ParsePersistenceDetail() { Doc = valueXml, LastNode = detail.LastNode, Node = right});
+                            sharpExpressionSyntax.ParseNode(rightLocation, true);
 
-                            doc.Add(blockXml);
-                            LastNode = valueXml;
+                            detail.Doc.Add(blockXml);
+                            detail.LastNode = valueXml;
                             break;
                     }
                 }

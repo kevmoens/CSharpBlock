@@ -15,34 +15,39 @@ namespace CSharpToBlockly.Variables
 
         ILogger<SharpIdentifierNameSyntax> _logger;
         IServiceProvider _serviceProvider;
-        public SharpIdentifierNameSyntax(ILogger<SharpIdentifierNameSyntax> logger, IServiceProvider serviceProvider)
+        ParsePersistence _parsePersistence;
+        public SharpIdentifierNameSyntax(ILogger<SharpIdentifierNameSyntax> logger, IServiceProvider serviceProvider, ParsePersistence parsePersistence)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node, bool isSet)
+        public void ParseNode(ParsePersistenceLocation location, bool isSet)
         {
+            var detail = _parsePersistence.Nodes[location];
+            _logger.LogTrace("Parse {Node.RawKind}", detail.Node.RawKind);
 
-            _logger.LogTrace("Parse {Node.RawKind}", node.RawKind);
-
-            if (!(node is IdentifierNameSyntax))
+            if (!(detail.Node is IdentifierNameSyntax))
             {
                 return;
             }
 
-            var identifierNode = node as IdentifierNameSyntax;
+            var identifierNode = detail.Node as IdentifierNameSyntax;
 
 
             if (isSet)
             {
 
-                doc.Add(new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ValueText));
+                detail.Doc.Add(new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ValueText));
                 return;
             }
 
-            doc.Add(new XElement("block", new XAttribute("type", "variables_get"), new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ValueText)));
-
+            detail.Doc.Add(new XElement("block", new XAttribute("type", "variables_get"), new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ValueText)));
+            if (!_parsePersistence.Variables.Contains(identifierNode.Identifier.ValueText))
+            {
+                _parsePersistence.Variables.Add(identifierNode.Identifier.ValueText);
+            }
         }
     }
 }

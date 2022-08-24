@@ -19,6 +19,7 @@ namespace CSharpToBlockly.Services
         public static IServiceCollection AddSharpToBlockly(this IServiceCollection services)
         {
             services.AddSingleton<SharpParse>();
+            services.AddSingleton<ParsePersistence>();
             services.AddSingleton<ISharpExpressionStatement, SharpExpressionStatement>();
             services.AddSingleton<ISharpExpressionSyntax, SharpExpressionSyntax>();
             services.AddSingleton<ISharpIdentifierNameSyntax, SharpIdentifierNameSyntax>();

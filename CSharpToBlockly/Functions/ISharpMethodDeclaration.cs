@@ -5,6 +5,6 @@ namespace CSharpToBlockly.Functions
 {
     internal interface ISharpMethodDeclaration
     {
-        void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node);
+        void ParseNode(ParsePersistenceLocation location);
     }
 }

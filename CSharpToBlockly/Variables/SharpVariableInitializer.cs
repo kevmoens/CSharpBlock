@@ -17,31 +17,35 @@ namespace CSharpToBlockly.Variables
     {
         ILogger<SharpVariableInitializer> _logger;
         IServiceProvider _serviceProvider;
-        public SharpVariableInitializer(ILogger<SharpVariableInitializer> logger, IServiceProvider serviceProvider)
+        ParsePersistence _parsePersistence;
+        public SharpVariableInitializer(ILogger<SharpVariableInitializer> logger, IServiceProvider serviceProvider, ParsePersistence parsePersistence)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        public void ParseNode(ParsePersistenceLocation location)
         {
-
-            if (!(node is EqualsValueClauseSyntax))
+            var detail = _parsePersistence.Nodes[location];
+            if (!(detail.Node is EqualsValueClauseSyntax))
             {
                 return;
             }
 
-            var expressionNode = node as EqualsValueClauseSyntax;
+            var expressionNode = detail.Node as EqualsValueClauseSyntax;
             if (expressionNode == null)
             {
                 return;
             }
-            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
+            _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
 
             var valueNode = expressionNode.Value;
 
             var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
-            sharpExpressionSyntax.ParseNode(ref doc, ref LastNode, valueNode, true);
+            var expressionLocation = location.CreateChildNode("0");
+            _parsePersistence.Nodes.TryAdd(expressionLocation, new ParsePersistenceDetail() {  Doc = detail.Doc, LastNode = detail.LastNode, Node = valueNode});
+            sharpExpressionSyntax.ParseNode(expressionLocation, true);
 
         }
     }

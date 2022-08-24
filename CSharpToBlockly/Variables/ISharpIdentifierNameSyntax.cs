@@ -5,6 +5,6 @@ namespace CSharpToBlockly.Variables
 {
     internal interface ISharpIdentifierNameSyntax
     {
-        void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node, bool isSet);
+        void ParseNode(ParsePersistenceLocation location, bool isSet);
     }
 }

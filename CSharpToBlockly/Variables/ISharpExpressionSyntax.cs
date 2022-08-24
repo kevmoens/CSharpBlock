@@ -5,6 +5,6 @@ namespace CSharpToBlockly.Variables
 {
     internal interface ISharpExpressionSyntax
     {
-        void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node, bool createBlock);
+        void ParseNode(ParsePersistenceLocation location, bool createBlock);
     }
 }

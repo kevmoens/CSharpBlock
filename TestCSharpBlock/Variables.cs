@@ -51,7 +51,7 @@ namespace TestCSharpBlock
     </value>
     <next>
       <block type=""variables_set"">
-        <field name=""VAR"">n </field>
+        <field name=""VAR"">n</field>
         <value name=""VALUE"">
           <block type=""text"">
             <field name=""TEXT"">2</field>
@@ -85,7 +85,7 @@ namespace TestCSharpBlock
     </value>
     <next>
       <block type=""variables_set"">
-        <field name=""VAR"">n </field>
+        <field name=""VAR"">n</field>
         <value name=""VALUE"">
           <block type=""math_number"">
             <field name=""NUM"">2</field>

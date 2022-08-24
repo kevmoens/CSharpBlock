@@ -13,10 +13,12 @@ namespace CSharpToBlockly
     {
         ILogger<SharpParse> _logger;
         IServiceProvider _serviceProvider;
-        public SharpParse(ILogger<SharpParse> logger, IServiceProvider serviceProvider)
+        ParsePersistence _parsePersistence;
+        public SharpParse(ILogger<SharpParse> logger, IServiceProvider serviceProvider, ParsePersistence parsePersistence)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _parsePersistence = parsePersistence;
         }
 
         //Look at this site to compare block to SyntaxTree
@@ -26,14 +28,30 @@ namespace CSharpToBlockly
             _logger.LogInformation("Parse START");
             XElement rootElement = new XElement("xml", "");
             SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Parse, SourceCodeKind.Regular));
+            var location = new ParsePersistenceLocation("0");            
             SyntaxNode node = tree.GetRoot();
             XElement lastNode = new XElement("Empty", "");
-            ParseNode(ref rootElement, ref lastNode, node);
+            _parsePersistence.Document = rootElement;
+            _parsePersistence.TopNode = node;
+            _parsePersistence.Reset();
+            _parsePersistence.Nodes.TryAdd(location, new ParsePersistenceDetail() { Doc = rootElement, LastNode = lastNode, Node = node });
+            ParseNode(location);
+            var variablesXml = new XElement("variables", "");
+            if (_parsePersistence.Variables.Count > 0)
+            {
+                foreach (var variable in _parsePersistence.Variables)
+                {
+                    variablesXml.Add(new XElement("variable", variable));
+                }
+                rootElement.AddFirst(variablesXml);
+            }
             return rootElement;
 
         }
-        internal void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        internal void ParseNode(ParsePersistenceLocation location)
         {
+            var detail = _parsePersistence.Nodes[location];
+            var node = detail.Node;            
             _logger.LogTrace("Parse {Node.Kind}", node.Kind());
             switch (node.Kind().ToString())
             {
@@ -42,42 +60,54 @@ namespace CSharpToBlockly
                     if (node.Kind().ToString() == "MethodDeclaration")
                     {
                         var sharpMethod = _serviceProvider.GetRequiredService<ISharpMethodDeclaration>();
-                        sharpMethod.ParseNode(ref doc, ref LastNode, node);
+                        sharpMethod.ParseNode(location);
                     }
-                    //doc.Add(new XElement("MissingNode", node.GetType().Name));                    
+                    //doc.Add(new XElement("MissingNode", node.GetType().Name));
+                    int childIdx = 0;
                     foreach (var child in node.ChildNodes())
                     {
-                        if (LastNode.Parent != null)
+                        if (detail.LastNode.Parent != null)
                         {
                             var nextNode = new XElement("next", "");
-                            LastNode.Add(nextNode);
-                            ParseNode(ref nextNode, ref LastNode, child);
+                            detail.LastNode.Add(nextNode);
+                            var childLocation = location.CreateChildNode(childIdx.ToString());
+                            _parsePersistence.Nodes.TryAdd(childLocation, new ParsePersistenceDetail() { Doc = nextNode, LastNode = detail.LastNode, Node = child });
+                            ParseNode(childLocation);
+                            detail.LastNode = _parsePersistence.Nodes[childLocation].LastNode;
                         }
                         else
-                        {                            
-                            ParseNode(ref doc, ref LastNode, child);
+                        {
+                            var childLocation = location.CreateChildNode(childIdx.ToString());
+                            _parsePersistence.Nodes.TryAdd(childLocation, new ParsePersistenceDetail() { Doc = detail.Doc, LastNode = detail.LastNode, Node = child });
+                            ParseNode(childLocation);
+                            detail.LastNode = _parsePersistence.Nodes[childLocation].LastNode;
                         }
+                        childIdx++;
                     }
                     break;
                 case "LocalDeclarationStatement":
                     var sharpDeclare = _serviceProvider.GetRequiredService<ISharpLocalDeclarationStatement>();
-                    sharpDeclare.ParseNode(ref doc, ref LastNode, node);
+                    sharpDeclare.ParseNode(location);
                     break;
                 case "ExpressionStatement":
                     var sharpExpressionStatement = _serviceProvider.GetRequiredService<ISharpExpressionStatement>();
-                    sharpExpressionStatement.ParseNode(ref doc, ref LastNode, node);
+                    sharpExpressionStatement.ParseNode(location);
                     break;
                 case "GlobalStatement":
                 default:
                     var lastNode = new XElement("Empty", "");
+                    int cIdx = 0;
                     foreach (var child in node.ChildNodes())
-	                {
-                        ParseNode(ref doc, ref lastNode, child);
-                        if (lastNode.Name != "Empty")
+                    {
+                        var childLocation = location.CreateChildNode(cIdx.ToString());
+                        _parsePersistence.Nodes.TryAdd(childLocation, new ParsePersistenceDetail() { Doc = detail.Doc, LastNode = detail.LastNode, Node = child });
+                        ParseNode(childLocation);                        
+                        if ((_parsePersistence.Nodes[childLocation].LastNode?.Name ?? "Empty") != "Empty")
                         {
-                            LastNode = lastNode;
+                            detail.LastNode = _parsePersistence.Nodes[childLocation].LastNode;
                         }
-	                }       
+                        cIdx++;
+                    }       
                     break;
             }
         }

@@ -11,21 +11,24 @@ namespace CSharpToBlockly.Functions
     {
         ILogger<SharpMethodDeclaration> _logger;
         IServiceProvider _serviceProvider;
-        public SharpMethodDeclaration(ILogger<SharpMethodDeclaration> logger, IServiceProvider serviceProvider)
+        ParsePersistence _parsePersistence;
+        public SharpMethodDeclaration(ILogger<SharpMethodDeclaration> logger, IServiceProvider serviceProvider, ParsePersistence parsePersistence)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ref XElement doc, ref XElement LastNode, SyntaxNode node)
+        public void ParseNode(ParsePersistenceLocation location)
         {
-
-            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
-            if (!(node is MethodDeclarationSyntax))
+            var detail = _parsePersistence.Nodes[location];
+            
+            _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
+            if (!(detail.Node is MethodDeclarationSyntax))
             {
                 return;
             }
 
-            var methodNode = node as MethodDeclarationSyntax;
+            var methodNode = detail.Node as MethodDeclarationSyntax;
             if (methodNode == null)
             {
                 return;
@@ -56,16 +59,19 @@ namespace CSharpToBlockly.Functions
 
             var methodBlockXml = new XElement("statement", new XAttribute("name", "STACK"));
             methodXml.Add(methodBlockXml);
-
-            foreach (var child in node.ChildNodes())
+            int childIdx = 0;
+            foreach (var child in detail.Node.ChildNodes())
             {
                 var sharpParse = _serviceProvider.GetRequiredService<SharpParse>();
-                sharpParse.ParseNode(ref methodBlockXml, ref LastNode, child);
+                var childLocation = location.CreateChildNode($"{childIdx}");
+                _parsePersistence.Nodes.TryAdd(childLocation, new ParsePersistenceDetail() { Doc = detail.Doc, LastNode = detail.LastNode, Node = child });
+                sharpParse.ParseNode(childLocation);
+                childIdx++;
             }
 
-            doc.Add(methodXml);
+            detail.Doc.Add(methodXml);
 
-            LastNode = methodXml;
+            detail.LastNode = methodXml;
 
         }
     }
