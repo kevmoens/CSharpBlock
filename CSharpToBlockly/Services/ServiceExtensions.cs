@@ -24,6 +24,7 @@ namespace CSharpToBlockly.Services
             services.AddSingleton<ISharpExpressionSyntax, SharpExpressionSyntax>();
             services.AddSingleton<ISharpEqualValueClauseSyntax, SharpEqualValueClauseSyntax>();
             services.AddSingleton<ISharpIdentifierNameSyntax, SharpIdentifierNameSyntax>();
+            services.AddSingleton<ISharpFieldDeclarationSyntax, SharpFieldDeclarationSyntax>();
             services.AddSingleton<ISharpLocalDeclarationStatement, SharpLocalDeclarationStatement>();
             services.AddSingleton<ISharpMethodDeclaration, SharpMethodDeclaration>();
             services.AddSingleton<ISharpVariableInitializer, SharpVariableInitializer>();
