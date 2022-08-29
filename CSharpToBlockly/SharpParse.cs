@@ -41,7 +41,7 @@ namespace CSharpToBlockly
             {
                 foreach (var variable in _parsePersistence.Variables)
                 {
-                    variablesXml.Add(new XElement("variable", variable));
+                    variablesXml.Add(new XElement("variable", variable.Name));
                 }
                 rootElement.AddFirst(variablesXml);
             }
