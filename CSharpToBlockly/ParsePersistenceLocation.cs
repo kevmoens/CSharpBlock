@@ -47,7 +47,16 @@ namespace CSharpToBlockly
             string current = TruncateToken();
             return new ParsePersistenceLocation(current + $".{childSuffix}");
         }
-        
+
+        public ParsePersistenceLocation CreateToken(string childToken)
+        {
+            string current = TruncateToken();
+            return new ParsePersistenceLocation(current + $":{childToken}");
+        }
+        public bool HasParent(ParsePersistenceLocation parent)
+        {
+            return _location.StartsWith(parent.ToString());
+        }
         private string TruncateToken()
         {
             var current = _location;
