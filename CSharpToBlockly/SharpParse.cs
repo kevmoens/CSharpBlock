@@ -94,7 +94,6 @@ namespace CSharpToBlockly
                     sharpExpressionStatement.ParseNode(location);
                     break;
                 case "GlobalStatement":
-                default:
                     var lastNode = new XElement("Empty", "");
                     int cIdx = 0;
                     foreach (var child in node.ChildNodes())
@@ -108,6 +107,9 @@ namespace CSharpToBlockly
                         }
                         cIdx++;
                     }       
+                    break;
+                default:
+                    System.Diagnostics.Debug.Print($"Warning Missing Kind: {node.Kind()} location {location}");
                     break;
             }
         }
