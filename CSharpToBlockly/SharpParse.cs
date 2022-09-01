@@ -28,6 +28,10 @@ namespace CSharpToBlockly
             _logger.LogInformation("Parse START");
             XElement rootElement = new XElement("xml", "");
             SyntaxTree tree = CSharpSyntaxTree.ParseText(code, new CSharpParseOptions(LanguageVersion.Latest, DocumentationMode.Parse, SourceCodeKind.Regular));
+            var compilation = CSharpCompilation.Create("HelloWorld")
+                .AddSyntaxTrees(tree);
+            SemanticModel model = compilation.GetSemanticModel(tree);
+            _parsePersistence.SemanticModel = model;
             var location = new ParsePersistenceLocation("0");            
             SyntaxNode node = tree.GetRoot();
             XElement lastNode = new XElement("Empty", "");
