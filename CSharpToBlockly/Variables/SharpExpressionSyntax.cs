@@ -45,6 +45,8 @@ namespace CSharpToBlockly.Variables
                             literalXml.Add(new XAttribute("type", "math_number"));
                         }
                         literalXml.Add(new XElement("field", new XAttribute("name", "NUM"), literalNode.Token.ValueText));
+                        var numericLocation = location.CreateToken("0");
+                        _parsePersistence.Nodes.TryAdd(numericLocation, new ParsePersistenceDetail() { Doc = detail.Doc, LastNode = literalXml, Node = literalNode, Token = literalNode.Token });
                         break;
 
                     case "StringLiteralExpression":
@@ -53,6 +55,9 @@ namespace CSharpToBlockly.Variables
                             literalXml.Add(new XAttribute("type", "text"));
                         }
                         literalXml.Add(new XElement("field", new XAttribute("name", "TEXT"), literalNode.Token.ValueText));
+
+                        var stringLocation = location.CreateToken("0");
+                        _parsePersistence.Nodes.TryAdd(stringLocation, new ParsePersistenceDetail() { Doc = detail.Doc, LastNode = literalXml, Node = literalNode, Token = literalNode.Token });
                         break;
                 }
                 if (createBlock)
@@ -96,7 +101,15 @@ namespace CSharpToBlockly.Variables
                 switch (binaryNode.OperatorToken.Text)
                 {
                     case "+":
-                        detail.LastNode = ParseNodeAdd(location, detail.Doc, blockXml, left, right);
+                        var literals = right.DescendantTokens().Where(t => t.Kind().ToString().Contains("Literal")).ToArray();
+                        if (literals.Any() && literals[0].Kind().ToString() == "StringLiteralToken")
+                        {
+                            detail.LastNode = ParseNodeAppendText(location, detail.Doc, blockXml, left, right);
+                        }
+                        else
+                        {
+                            detail.LastNode = ParseNodeAdd(location, detail.Doc, blockXml, left, right);
+                        }
                         break;
                     case "%":
                         detail.LastNode = ParseNodeModulo(location, detail.Doc, blockXml, left, right);
@@ -130,6 +143,19 @@ namespace CSharpToBlockly.Variables
             blockXml.Add(valueBXml);
             var rightLocation = location.CreateChildNode("1");
             _parsePersistence.Nodes.TryAdd(rightLocation, new ParsePersistenceDetail() { Doc = valueBXml, LastNode = parentBlockXml, Node = right});
+            sharpExpressionSyntax.ParseNode(rightLocation, true);
+
+            return LastNode;
+        }
+
+        private XElement ParseNodeAppendText(ParsePersistenceLocation location, XElement LastNode, XElement? parentBlockXml, ExpressionSyntax left, ExpressionSyntax right)
+        {
+            LastNode.Attribute("name").Value = "TEXT";
+            parentBlockXml.Attribute("type").Value = "text_append";
+
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            var rightLocation = location.CreateChildNode("0");
+            _parsePersistence.Nodes.TryAdd(rightLocation, new ParsePersistenceDetail() { Doc = LastNode, LastNode = parentBlockXml, Node = right });
             sharpExpressionSyntax.ParseNode(rightLocation, true);
 
             return LastNode;
