@@ -89,6 +89,10 @@ namespace CSharpToBlockly
                         childIdx++;
                     }
                     break;
+                case "FieldDeclaration":
+                    var sharpField = _serviceProvider.GetRequiredService<ISharpFieldDeclarationSyntax>();
+                    sharpField.ParseNode(location);
+                    break;
                 case "LocalDeclarationStatement":
                     var sharpDeclare = _serviceProvider.GetRequiredService<ISharpLocalDeclarationStatement>();
                     sharpDeclare.ParseNode(location);

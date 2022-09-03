@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using System;
@@ -44,9 +45,10 @@ namespace CSharpToBlockly.Variables
             }
 
             detail.Doc.Add(new XElement("block", new XAttribute("type", "variables_get"), new XElement("field", new XAttribute("name", "VAR"), identifierNode.Identifier.ValueText)));
-            if (!_parsePersistence.Variables.Contains(identifierNode.Identifier.ValueText))
+            if (!_parsePersistence.Variables.Any((item) => item.Name == identifierNode.Identifier.ValueText))
             {
-                _parsePersistence.Variables.Add(identifierNode.Identifier.ValueText);
+                //TODO Hold Type
+                _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = identifierNode.Identifier.ValueText });
             }
         }
     }

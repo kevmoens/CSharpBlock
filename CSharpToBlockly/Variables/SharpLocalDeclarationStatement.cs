@@ -43,43 +43,52 @@ namespace CSharpToBlockly.Variables
             
             
             string blockType = "text";
-            if (declareNode.Declaration.Type.IsVar)
+            switch (declareNode.Declaration.Type.ToString())
             {
-
-            }
-            else
-            {
-                switch (declareNode.Declaration.Type.ToString())
-                {
-                    case "int":
-                        blockType = "math_number";
-                        break;
-                    default:
-                        blockType = declareNode.Declaration.Type.ToString();
-                        break;
-                }
+                case "int":
+                    blockType = "math_number";
+                    break;
+                default:
+                    blockType = declareNode.Declaration.Type.ToString();
+                    break;
             }
 
             var blockXml = new XElement("block", new XAttribute("type", "variables_set"));
             foreach (var variable in declareNode.Declaration.Variables)
             {
-                if (!_parsePersistence.Variables.Contains(variable.Identifier.ValueText))
-                {
-                    _parsePersistence.Variables.Add(variable.Identifier.ValueText);
-                }
                 
                 if (variable.Initializer != null)
                 {
-                    var initializer = variable.Initializer;
-                    var fieldXml = new XElement("field", new XAttribute("name", "VAR"), variable.Identifier.ValueText);
-                    blockXml.Add(fieldXml);
-                    var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
-                    blockXml.Add(valueXml);
+                    if (variable.Initializer is EqualsValueClauseSyntax)
+                    {
 
-                    var sharpVariableInitializer = _serviceProvider.GetRequiredService<ISharpVariableInitializer>();
-                    var initLocation = location.CreateChildNode("0");
-                    _parsePersistence.Nodes.TryAdd(initLocation, new ParsePersistenceDetail() { Doc = valueXml, LastNode = detail.LastNode, Node = initializer });
-                    sharpVariableInitializer.ParseNode(initLocation);
+                        var initLocation = location.CreateChildNode("0");
+                        _parsePersistence.Nodes.Add(initLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = variable.Initializer });
+                        var varDeclarator = _serviceProvider.GetRequiredService<ISharpEqualValueClauseSyntax>();
+                        varDeclarator.ParseNode(initLocation);
+                    } else
+                    {
+                        var initLocation = location.CreateChildNode("0");
+                        _parsePersistence.Nodes.Add(initLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = variable.Initializer });
+                        var varDeclarator = _serviceProvider.GetRequiredService<ISharpVariableDeclaratorSyntax>();
+                        varDeclarator.ParseNode(initLocation);
+                    }
+
+                } else
+                {
+                    if (blockType == "math_number")
+                    {
+                        _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = variable.Identifier.ValueText, Type = "numeric" });
+                    } else
+                    {
+                        if (blockType == "text")
+                        {
+                            _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = variable.Identifier.ValueText, Type = "string" });
+                        } else
+                        {
+                            _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = variable.Identifier.ValueText});
+                        }
+                    }
                 }
             }
             
