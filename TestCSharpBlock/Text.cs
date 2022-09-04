@@ -16,21 +16,25 @@ namespace TestCSharpBlock
         [Test]
         public void AppendText()
         {
-            var code = @"item = item + ""less"";";
+            var code = @"var item = """"; item = item + ""less"";";
             var expected = @"<xml>
-  <variables>
-    <variable>item</variable>
-  </variables>
-  <block type=""text_append"">
+  <block type=""variables_set"">
     <field name=""VAR"">item</field>
-    <value name=""TEXT"">
-      <shadow type=""text"">
-        <field name=""TEXT""></field>
-      </shadow>
+    <value name=""VALUE"">
       <block type=""text"">
-        <field name=""TEXT"">less</field>
+        <field name=""TEXT""></field>
       </block>
     </value>
+    <next>
+      <block type=""text_append"">
+        <field name=""VAR"">item</field>
+        <value name=""TEXT"">
+          <block type=""text"">
+            <field name=""TEXT"">less</field>
+          </block>
+        </value>
+      </block>
+    </next>
   </block>
 </xml>";
             var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();

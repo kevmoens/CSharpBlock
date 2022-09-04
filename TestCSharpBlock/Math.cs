@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TestCSharpBlock.Configuration;
 
 namespace TestCSharpBlock
@@ -61,7 +62,10 @@ namespace TestCSharpBlock
 </xml>";
             var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
             var actual = parser.Parse(code).ToString();
-            Assert.AreEqual(expected, actual);
+
+            var doc = XDocument.Parse(expected);
+            doc.Descendants().Where(x => x.Name == "variables").Remove();
+            Assert.IsTrue(expected == actual || doc.ToString() == actual);
         }
 
 
@@ -104,7 +108,10 @@ namespace TestCSharpBlock
 </xml>";
             var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
             var actual = parser.Parse(code).ToString();
-            Assert.AreEqual(expected, actual);
+
+            var doc = XDocument.Parse(expected);
+            doc.Descendants().Where(x => x.Name == "variables").Remove();
+            Assert.IsTrue(expected == actual || doc.ToString() == actual);
         }
 
 
@@ -149,7 +156,10 @@ namespace TestCSharpBlock
 </xml>";
             var parser = Bootstrapper.ServiceProvider.GetRequiredService<SharpParse>();
             var actual = parser.Parse(code).ToString();
-            Assert.AreEqual(expected, actual);
+
+            var doc = XDocument.Parse(expected);
+            doc.Descendants().Where(x => x.Name == "variables").Remove();
+            Assert.IsTrue(expected == actual || doc.ToString() == actual);
         }
     }
 }
