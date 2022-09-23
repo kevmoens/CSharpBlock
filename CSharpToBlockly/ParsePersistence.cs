@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ namespace CSharpToBlockly
     public class ParsePersistence
     {
         public XElement Document { get; set; } = new XElement("xml", "");
-        public SyntaxNode? TopNode { get; set; }
+        public SyntaxNode TopNode { get; set; } = SyntaxFactory.EmptyStatement();
         public Dictionary<ParsePersistenceLocation, ParsePersistenceDetail> Nodes { get; set; } = new ();
         public SemanticModel? SemanticModel { get; set; } 
         public HashSet<ParsePersistenceVariable> Variables { get; set; } = new HashSet<ParsePersistenceVariable>();
@@ -24,10 +26,10 @@ namespace CSharpToBlockly
     
     public class ParsePersistenceDetail
     {
-        public XElement Doc { get; set; }
-        public XElement? LastNode { get; set; }
-        public SyntaxNode Node { get; set; }
-        public SyntaxToken? Token { get; set; }
+        public XElement Doc { get; set; } = new("doc", "");
+        public XElement LastNode { get; set; } = new("lastnode", "");
+        public SyntaxNode Node { get; set; } = SyntaxFactory.EmptyStatement();
+        public SyntaxToken Token { get; set; }
     }
     public class ParsePersistenceVariable
     {
