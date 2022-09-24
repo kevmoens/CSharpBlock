@@ -34,7 +34,7 @@ namespace CSharpToBlockly.Variables
                 return;
             }
 
-            var identifierNode = detail.Node as IdentifierNameSyntax;
+            var identifierNode = (IdentifierNameSyntax)detail.Node;
 
 
             if (isSet)

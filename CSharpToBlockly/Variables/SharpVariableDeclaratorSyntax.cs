@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,10 @@ namespace CSharpToBlockly.Variables
 
 
             var initializer = variable.Initializer;
+            if (initializer == null)
+            {
+                return;
+            }
             var fieldXml = new XElement("field", new XAttribute("name", "VAR"), variable.Identifier.ValueText);
             detail.Doc.Add(fieldXml);
             var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
@@ -50,13 +55,29 @@ namespace CSharpToBlockly.Variables
             _parsePersistence.Nodes.TryAdd(initLocation, new ParsePersistenceDetail() { Doc = valueXml, LastNode = detail.LastNode, Node = initializer });
             sharpVariableInitializer.ParseNode(initLocation);
 
-            if (_parsePersistence.Nodes.Where(n => n.Key.HasParent(location) && n.Value?.Token != null && (n.Value?.Token.Value.Kind().ToString().Contains("Literal") ?? false)).FirstOrDefault().Value?.Token.Value.Kind().ToString() is "StringLiteralToken")
+
+            var tokenType = (SyntaxToken?)_parsePersistence.Nodes.FirstOrDefault((n) =>
+                {
+                    if (!n.Key.HasParent(location))
+                    {
+                        return false;
+                    }
+
+                    SyntaxToken? tokenValue = (SyntaxToken?)n.Value.Token.Value;
+                    if (tokenValue == null)
+                    {
+                        return false;
+                    }
+                    return tokenValue.Value.Kind().ToString().Contains("Literal");
+                }).Value.Token.Value;
+
+            if (tokenType?.Kind().ToString() == "StringLiteralToken")
             {
                 _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = variable.Identifier.ValueText, Type = "string" });
             }
             else
             {
-                if (_parsePersistence.Nodes.Where(n => n.Key.HasParent(location) && n.Value?.Token != null && (n.Value?.Token.Value.Kind().ToString().Contains("Literal") ?? false)).FirstOrDefault().Value?.Token.Value.Kind().ToString() is "NumericLiteralToken")
+                if (tokenType?.Kind().ToString() == "NumericLiteralToken")
                 {
                     _parsePersistence.Variables.Add(new ParsePersistenceVariable() { Name = variable.Identifier.ValueText, Type = "numeric" });
                 }

@@ -26,11 +26,18 @@ namespace CSharpToBlockly.Variables
         {
 
             var detail = _parsePersistence.Nodes[location];
+            if (detail == null) 
+            {
+                return;
+            }
             if (detail.Node is EqualsValueClauseSyntax)
             {
                 _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
                 var initializer = detail.Node as EqualsValueClauseSyntax;
-                
+                if (initializer?.Parent == null)
+                {
+                    return;
+                }
                 var fieldXml = new XElement("field", new XAttribute("name", "VAR"), ((VariableDeclaratorSyntax)initializer.Parent).Identifier.ValueText);
                 detail.Doc.Add(fieldXml);
                 var valueXml = new XElement("value", new XAttribute("name", "VALUE"));

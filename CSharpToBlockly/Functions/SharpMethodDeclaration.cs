@@ -21,13 +21,16 @@ namespace CSharpToBlockly.Functions
         public void ParseNode(ParsePersistenceLocation location)
         {
             var detail = _parsePersistence.Nodes[location];
-            
+            if (detail is null)
+            {
+                return;
+            }
+
             _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
             if (!(detail.Node is MethodDeclarationSyntax))
             {
                 return;
             }
-
             var methodNode = detail.Node as MethodDeclarationSyntax;
             if (methodNode == null)
             {
@@ -69,7 +72,7 @@ namespace CSharpToBlockly.Functions
                 childIdx++;
             }
 
-            detail.Doc.Add(methodXml);
+            detail.Doc?.Add(methodXml);
 
             detail.LastNode = methodXml;
 

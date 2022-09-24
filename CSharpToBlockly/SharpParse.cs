@@ -20,6 +20,7 @@ namespace CSharpToBlockly
             _serviceProvider = serviceProvider;
             _parsePersistence = parsePersistence;
         }
+        public List<string> Usings { get; set; } = new List<string>();
 
         //Look at this site to compare block to SyntaxTree
         //https://blockly-demo.appspot.com/static/demos/code/index.html
@@ -55,10 +56,19 @@ namespace CSharpToBlockly
         internal void ParseNode(ParsePersistenceLocation location)
         {
             var detail = _parsePersistence.Nodes[location];
-            var node = detail.Node;            
-            _logger.LogTrace("Parse {Node.Kind}", node.Kind());
-            switch (node.Kind().ToString())
+            if (detail == null)
             {
+                return;
+            }
+            var node = detail.Node;  
+            if (node == null)
+            { 
+                return;
+            }
+            _logger.LogTrace("Parse {Node.Kind}", node?.Kind());
+            switch (node?.Kind().ToString())
+            {
+                case "NamespaceDeclaration":
                 case "CompilationUnit":
                 case "MethodDeclaration":                    
                     if (node.Kind().ToString() == "MethodDeclaration")
@@ -89,6 +99,10 @@ namespace CSharpToBlockly
                         childIdx++;
                     }
                     break;
+                case "ClassDeclaration":
+                    var sharpClass = _serviceProvider.GetRequiredService<ISharpClassDeclaration>();
+                    sharpClass.ParseNode(location);
+                    break;
                 case "FieldDeclaration":
                     var sharpField = _serviceProvider.GetRequiredService<ISharpFieldDeclarationSyntax>();
                     sharpField.ParseNode(location);
@@ -116,8 +130,11 @@ namespace CSharpToBlockly
                         cIdx++;
                     }       
                     break;
+                case "UsingDirective":
+                    Usings.Add(node.ToFullString());
+                    break;
                 default:
-                    System.Diagnostics.Debug.Print($"Warning Missing Kind: {node.Kind()} location {location}");
+                    System.Diagnostics.Debug.Print($"Warning Missing Kind: {node?.Kind()} location {location}");
                     break;
             }
         }

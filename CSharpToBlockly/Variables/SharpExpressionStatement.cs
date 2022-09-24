@@ -30,7 +30,7 @@ namespace CSharpToBlockly.Variables
             if (detail.Node is ExpressionStatementSyntax)
             {
                 _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
-                var literalNode = detail.Node as ExpressionStatementSyntax;
+                var literalNode = (ExpressionStatementSyntax)detail.Node;
                 switch (literalNode.Expression.Kind().ToString())
                 {
                     case "SimpleAssignmentExpression":
@@ -43,8 +43,8 @@ namespace CSharpToBlockly.Variables
                     switch (child.GetType().Name)
                     {
                         case "AssignmentExpressionSyntax":
-                            var assign = child as AssignmentExpressionSyntax;
-                            var left = assign.Left as ExpressionSyntax;
+                            var assign = (AssignmentExpressionSyntax)child;
+                            var left = (ExpressionSyntax)assign.Left;
                             var blockXml = new XElement("block", new XAttribute("type", "variables_set"));
 
                             var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();

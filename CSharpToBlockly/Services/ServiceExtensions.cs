@@ -22,6 +22,7 @@ namespace CSharpToBlockly.Services
             services.AddSingleton<ParsePersistence>();
             services.AddSingleton<ISharpExpressionStatement, SharpExpressionStatement>();
             services.AddSingleton<ISharpExpressionSyntax, SharpExpressionSyntax>();
+            services.AddSingleton<ISharpClassDeclaration, SharpClassDeclaration>();
             services.AddSingleton<ISharpEqualValueClauseSyntax, SharpEqualValueClauseSyntax>();
             services.AddSingleton<ISharpIdentifierNameSyntax, SharpIdentifierNameSyntax>();
             services.AddSingleton<ISharpFieldDeclarationSyntax, SharpFieldDeclarationSyntax>();
