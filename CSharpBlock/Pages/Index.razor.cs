@@ -15,7 +15,6 @@ namespace CSharpBlock.Pages
 {
 	public partial class Index : ComponentBase
 	{
-        string code = "{dynamic n;n=1;for(int intcount=0;count<4;count++){n=(n*2);}}";
         private IJSObjectReference? module;
         internal class CustomPrintBlock : IBlock
         {
@@ -23,7 +22,11 @@ namespace CSharpBlock.Pages
 
             public override object Evaluate(Context context)
             {
-                Text.Add((this.Values.FirstOrDefault(x => x.Name == "TEXT")?.Evaluate(context) ?? "").ToString());
+                var value = ((Values?.FirstOrDefault(x => x.Name == "TEXT")?.Evaluate(context)) ?? "").ToString();
+                if (value != null)
+                {
+                    Text.Add(value);
+                }
                 return base.Evaluate(context);
             }
         }
@@ -90,8 +93,11 @@ namespace CSharpBlock.Pages
 </xml>";
 
             //var result = SharpParse.Parse(code ?? "");
-            await module.InvokeVoidAsync("setBlocks", new object?[] { result });
-            StateHasChanged();
+            if (module != null)
+            {
+                await module.InvokeVoidAsync("setBlocks", new object?[] { result });
+                StateHasChanged();
+            }
             //SyntaxTree codeTree = CSharpSyntaxTree.ParseText(code ?? "");
             //var node = codeTree.GetRoot();
             //foreach (var child in node.ChildNodes())
