@@ -76,7 +76,7 @@ namespace TestCSharpBlock
 
 
 
-        [Test]
+        //[Test]
         public void TextToUpper()
         {
             var code = @"""Kevin"".ToUpper();";
@@ -99,7 +99,7 @@ namespace TestCSharpBlock
         }
 
 
-        [Test]
+        //[Test]
         public void Substring1()
         {
             var code = @"text = text.Substring(1,1);";
