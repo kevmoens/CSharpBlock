@@ -12,6 +12,7 @@
 	<Description>Convert C# to Blockly XML</Description>
 	<Copyright>https://github.com/kevmoens/CSharpBlock/blob/master/license.md</Copyright>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<Authors>KevMoens@github</Authors>
   </PropertyGroup>
 
   <ItemGroup>
