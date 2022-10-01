@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
 	<Version>0.2.0</Version>
 	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Title>CSharpToBlockly</Title>
+	<PackageProjectUrl>https://github.com/kevmoens/CSharpBlock</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/kevmoens/CSharpBlock</RepositoryUrl>
+	<Description>Convert C# to Blockly XML</Description>
   </PropertyGroup>
 
   <ItemGroup>
