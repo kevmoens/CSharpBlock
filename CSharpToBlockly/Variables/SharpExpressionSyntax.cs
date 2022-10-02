@@ -10,10 +10,11 @@ using static System.Net.Mime.MediaTypeNames;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.CodeAnalysis.CSharp;
+using Neleus.DependencyInjection.Extensions;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpExpressionSyntax : ISharpExpressionSyntax
+    internal class SharpExpressionSyntax : ISharpSyntax
     {
 
         ILogger<SharpExpressionSyntax> _logger;
@@ -26,7 +27,7 @@ namespace CSharpToBlockly.Variables
             _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ParsePersistenceLocation location, bool createBlock)
+        public void ParseNode(ParsePersistenceLocation location, bool createBlock = false)
         {
             var detail = _parsePersistence.Nodes[location];
             _logger.LogTrace("Parse {Node.Kind}", detail.Node.Kind());
@@ -79,7 +80,7 @@ namespace CSharpToBlockly.Variables
             //
             else if (detail.Node is IdentifierNameSyntax)
             {
-                var sharpIdentifierNameSyntax = _serviceProvider.GetRequiredService<ISharpIdentifierNameSyntax>();
+                var sharpIdentifierNameSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpIdentifierNameSyntax");
                 bool isSet = true;
                 if (detail.Node.Parent is BinaryExpressionSyntax)
                 {
@@ -155,7 +156,7 @@ namespace CSharpToBlockly.Variables
                                 new XAttribute("name", "A")
                            );
             blockXml.Add(valueAXml);
-            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpExpressionSyntax");
             var leftLocation = location.CreateChildNode("0");
             _parsePersistence.Nodes.TryAdd(leftLocation, new ParsePersistenceDetail() { Doc = valueAXml, LastNode = parentBlockXml, Node = left });
             sharpExpressionSyntax.ParseNode(leftLocation, true);
@@ -185,7 +186,7 @@ namespace CSharpToBlockly.Variables
                 typeAttr.Value = "text_append";
             }
 
-            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpExpressionSyntax");
             var rightLocation = location.CreateChildNode("0");
             _parsePersistence.Nodes.TryAdd(rightLocation, new ParsePersistenceDetail() { Doc = LastNode, LastNode = parentBlockXml, Node = right });
             sharpExpressionSyntax.ParseNode(rightLocation, true);
@@ -212,7 +213,7 @@ namespace CSharpToBlockly.Variables
                                     new XAttribute("name", "DIVISOR")
                                     , valueDivisorShadowXml
                                );
-            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpExpressionSyntax");
             
             if (left is LiteralExpressionSyntax)
             {

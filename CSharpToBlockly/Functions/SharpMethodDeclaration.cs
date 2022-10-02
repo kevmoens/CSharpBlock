@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace CSharpToBlockly.Functions
 {
-    internal class SharpMethodDeclaration : ISharpMethodDeclaration
+    internal class SharpMethodDeclaration : ISharpSyntax
     {
         ILogger<SharpMethodDeclaration> _logger;
         IServiceProvider _serviceProvider;
@@ -18,7 +18,7 @@ namespace CSharpToBlockly.Functions
             _serviceProvider = serviceProvider;
             _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
             var detail = _parsePersistence.Nodes[location];
             if (detail is null)

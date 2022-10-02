@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpIdentifierNameSyntax : ISharpIdentifierNameSyntax
+    internal class SharpIdentifierNameSyntax : ISharpSyntax
     {
 
         ILogger<SharpIdentifierNameSyntax> _logger;
@@ -24,7 +24,7 @@ namespace CSharpToBlockly.Variables
             _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ParsePersistenceLocation location, bool isSet)
+        public void ParseNode(ParsePersistenceLocation location, bool isSet = false)
         {
             var detail = _parsePersistence.Nodes[location];
             _logger.LogTrace("Parse {Node.RawKind}", detail.Node.RawKind);

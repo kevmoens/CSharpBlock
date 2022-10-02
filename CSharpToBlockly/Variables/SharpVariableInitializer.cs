@@ -10,10 +10,11 @@ using CSharpToBlockly.Functions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.CodeAnalysis.CSharp;
+using Neleus.DependencyInjection.Extensions;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpVariableInitializer : ISharpVariableInitializer
+    internal class SharpVariableInitializer : ISharpSyntax
     {
         ILogger<SharpVariableInitializer> _logger;
         IServiceProvider _serviceProvider;
@@ -25,7 +26,7 @@ namespace CSharpToBlockly.Variables
             _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
             var detail = _parsePersistence.Nodes[location];
             if (!(detail.Node is EqualsValueClauseSyntax))
@@ -42,7 +43,7 @@ namespace CSharpToBlockly.Variables
 
             var valueNode = expressionNode.Value;
 
-            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+            var sharpExpressionSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpExpressionSyntax");
             var expressionLocation = location.CreateChildNode("0");
             _parsePersistence.Nodes.TryAdd(expressionLocation, new ParsePersistenceDetail() {  Doc = detail.Doc, LastNode = detail.LastNode, Node = valueNode});
             sharpExpressionSyntax.ParseNode(expressionLocation, true);

@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CSharpToBlockly.Functions
 {
-    internal class SharpClassDeclaration : ISharpClassDeclaration
+    internal class SharpClassDeclaration : ISharpSyntax
     {
 
         ILogger<SharpClassDeclaration> _logger;
@@ -23,7 +23,7 @@ namespace CSharpToBlockly.Functions
             _serviceProvider = serviceProvider;
             _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {            
             var detail = _parsePersistence.Nodes[location];
 

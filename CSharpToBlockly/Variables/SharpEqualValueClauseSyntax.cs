@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using System.Xml.Linq;
+using Neleus.DependencyInjection.Extensions;
 
 namespace CSharpToBlockly.Variables
 {
-    public class SharpEqualValueClauseSyntax : ISharpEqualValueClauseSyntax
+    public class SharpEqualValueClauseSyntax : ISharpSyntax
     {
         ILogger<SharpEqualValueClauseSyntax> _logger;
         IServiceProvider _serviceProvider;
@@ -22,7 +23,7 @@ namespace CSharpToBlockly.Variables
             _serviceProvider = serviceProvider;
             _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
 
             var detail = _parsePersistence.Nodes[location];
@@ -43,7 +44,7 @@ namespace CSharpToBlockly.Variables
                 var valueXml = new XElement("value", new XAttribute("name", "VALUE"));
                 detail.Doc.Add(valueXml);
 
-                var sharpVariableInitializer = _serviceProvider.GetRequiredService<ISharpVariableInitializer>();
+                var sharpVariableInitializer = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpVariableInitializer");
                 var initLocation = location.CreateChildNode("0");
                 _parsePersistence.Nodes.TryAdd(initLocation, new ParsePersistenceDetail() { Doc = valueXml, LastNode = detail.LastNode, Node = initializer });
                 sharpVariableInitializer.ParseNode(initLocation);

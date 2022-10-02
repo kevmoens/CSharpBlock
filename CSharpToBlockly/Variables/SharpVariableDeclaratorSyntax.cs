@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Neleus.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ using System.Xml.Linq;
 
 namespace CSharpToBlockly.Variables
 {
-    public class SharpVariableDeclaratorSyntax : ISharpVariableDeclaratorSyntax
+    public class SharpVariableDeclaratorSyntax : ISharpSyntax
     {
         ILogger<SharpVariableDeclaratorSyntax> _logger;
         IServiceProvider _serviceProvider;
@@ -24,7 +25,7 @@ namespace CSharpToBlockly.Variables
             _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
 
             var detail = _parsePersistence.Nodes[location];
@@ -50,7 +51,7 @@ namespace CSharpToBlockly.Variables
             detail.Doc.Add(valueXml);
 
 
-            var sharpVariableInitializer = _serviceProvider.GetRequiredService<ISharpVariableInitializer>();
+            var sharpVariableInitializer = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpVariableInitializer");
             var initLocation = location.CreateChildNode("0");
             _parsePersistence.Nodes.TryAdd(initLocation, new ParsePersistenceDetail() { Doc = valueXml, LastNode = detail.LastNode, Node = initializer });
             sharpVariableInitializer.ParseNode(initLocation);

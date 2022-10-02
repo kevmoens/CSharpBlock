@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Neleus.DependencyInjection.Extensions;
 using System.Xml.Linq;
 
 namespace CSharpToBlockly
@@ -73,7 +74,7 @@ namespace CSharpToBlockly
                 case "MethodDeclaration":                    
                     if (node.Kind().ToString() == "MethodDeclaration")
                     {
-                        var sharpMethod = _serviceProvider.GetRequiredService<ISharpMethodDeclaration>();
+                        var sharpMethod = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpMethodDeclaration");
                         sharpMethod.ParseNode(location);
                     }
                     //doc.Add(new XElement("MissingNode", node.GetType().Name));
@@ -99,22 +100,6 @@ namespace CSharpToBlockly
                         childIdx++;
                     }
                     break;
-                case "ClassDeclaration":
-                    var sharpClass = _serviceProvider.GetRequiredService<ISharpClassDeclaration>();
-                    sharpClass.ParseNode(location);
-                    break;
-                case "FieldDeclaration":
-                    var sharpField = _serviceProvider.GetRequiredService<ISharpFieldDeclarationSyntax>();
-                    sharpField.ParseNode(location);
-                    break;
-                case "LocalDeclarationStatement":
-                    var sharpDeclare = _serviceProvider.GetRequiredService<ISharpLocalDeclarationStatement>();
-                    sharpDeclare.ParseNode(location);
-                    break;
-                case "ExpressionStatement":
-                    var sharpExpressionStatement = _serviceProvider.GetRequiredService<ISharpExpressionStatement>();
-                    sharpExpressionStatement.ParseNode(location);
-                    break;
                 case "GlobalStatement":
                     var lastNode = new XElement("Empty", "");
                     int cIdx = 0;
@@ -132,6 +117,13 @@ namespace CSharpToBlockly
                     break;
                 case "UsingDirective":
                     Usings.Add(node.ToFullString());
+                    break;
+                case "ClassDeclaration":
+                case "FieldDeclaration":
+                case "LocalDeclarationStatement":
+                case "ExpressionStatement":
+                    var sharpClass = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>($"Sharp{node?.Kind().ToString()}");
+                    sharpClass.ParseNode(location);
                     break;
                 default:
                     System.Diagnostics.Debug.Print($"Warning Missing Kind: {node?.Kind()} location {location}");

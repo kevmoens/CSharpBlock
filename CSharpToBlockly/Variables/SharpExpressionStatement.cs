@@ -9,10 +9,11 @@ using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.CodeAnalysis.CSharp;
+using Neleus.DependencyInjection.Extensions;
 
 namespace CSharpToBlockly.Variables
 {
-    public class SharpExpressionStatement : ISharpExpressionStatement
+    public class SharpExpressionStatement : ISharpSyntax
     {
 
         ILogger<SharpExpressionStatement> _logger;
@@ -24,7 +25,7 @@ namespace CSharpToBlockly.Variables
             _serviceProvider = serviceProvider;
             _parsePersistence = parsePersistence;
         }
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
             var detail = _parsePersistence.Nodes[location];
             if (detail.Node is ExpressionStatementSyntax)
@@ -47,7 +48,7 @@ namespace CSharpToBlockly.Variables
                             var left = (ExpressionSyntax)assign.Left;
                             var blockXml = new XElement("block", new XAttribute("type", "variables_set"));
 
-                            var sharpExpressionSyntax = _serviceProvider.GetRequiredService<ISharpExpressionSyntax>();
+                            var sharpExpressionSyntax = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpExpressionSyntax");
                             var leftLocation = location.CreateChildNode("0");
                             _parsePersistence.Nodes.TryAdd(leftLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = left });
                             sharpExpressionSyntax.ParseNode(leftLocation, false);

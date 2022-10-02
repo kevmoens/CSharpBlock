@@ -3,12 +3,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Neleus.DependencyInjection.Extensions;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace CSharpToBlockly.Variables
 {
-    internal class SharpLocalDeclarationStatement : ISharpLocalDeclarationStatement
+    internal class SharpLocalDeclarationStatement : ISharpSyntax
     {
         ILogger<SharpLocalDeclarationStatement> _logger;
         IServiceProvider _serviceProvider;
@@ -20,7 +21,7 @@ namespace CSharpToBlockly.Variables
             _parsePersistence = parsePersistence;
         }
 
-        public void ParseNode(ParsePersistenceLocation location)
+        public void ParseNode(ParsePersistenceLocation location, bool unusedvar = false)
         {
             var detail = _parsePersistence.Nodes[location];
             if (!(detail.Node is LocalDeclarationStatementSyntax))
@@ -64,13 +65,13 @@ namespace CSharpToBlockly.Variables
 
                         var initLocation = location.CreateChildNode("0");
                         _parsePersistence.Nodes.Add(initLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = variable.Initializer });
-                        var varDeclarator = _serviceProvider.GetRequiredService<ISharpEqualValueClauseSyntax>();
+                        var varDeclarator = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpEqualValueClauseSyntax");
                         varDeclarator.ParseNode(initLocation);
                     } else
                     {
                         var initLocation = location.CreateChildNode("0");
                         _parsePersistence.Nodes.Add(initLocation, new ParsePersistenceDetail() { Doc = blockXml, LastNode = detail.LastNode, Node = variable.Initializer });
-                        var varDeclarator = _serviceProvider.GetRequiredService<ISharpVariableDeclaratorSyntax>();
+                        var varDeclarator = _serviceProvider.GetRequiredServiceByName<ISharpSyntax>("SharpVariableDeclaratorSyntax");
                         varDeclarator.ParseNode(initLocation);
                     }
 
