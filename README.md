@@ -4,7 +4,7 @@ Convert C# to Blockly
 
 Currently I test by running TestCSharpBlockly and grabbing the generated XML and paste into XML tab in [Blockly](https://blockly-demo.appspot.com/static/demos/code/index.html)
 
-[![NuGet](https://img.shields.io/nuget/v/EzSmb.svg?label=NuGet)](https://www.nuget.org/packages/CSharpToBlockly/)
+[![NuGet](https://img.shields.io/nuget/v/CSharpToBlockly)](https://www.nuget.org/packages/CSharpToBlockly/)
 
 # Contribute
 ## How to contribute
